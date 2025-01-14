@@ -331,7 +331,7 @@ const gerarPdf = () => {
     doc.text(totalGeral.toLocaleString('pt-br', {minimumFractionDigits: 2}), 200, linha, {align: 'right'});
     linha += 10;
 
-    const fileHandle = new File([doc.output('blob')], "hello.pdf", { type: "application/pdf" });
+    const fileHandle = new File([doc.output('blob')], "cotacao.pdf", { type: "application/pdf" });
     share(fileHandle)
 }
 async function share(fileHandle) {
@@ -342,8 +342,8 @@ async function share(fileHandle) {
             // Iniciando o compartilhamento
             await navigator.share({
                 files: [fileHandle], // Arquivo a ser compartilhado
-                title: 'Arquivo Exemplo', // Título do compartilhamento
-                text: 'Veja o arquivo que estou compartilhando com você!', // Texto adicional
+                title: 'Cotação de Preços', // Título do compartilhamento
+                text: 'Segue cotação.', // Texto adicional
             });
         } else {
             console.log("Compartilhamento não suportado para este tipo de arquivo.");
