@@ -125,7 +125,7 @@ const __getItens = () => {
 
                 row.insertAdjacentHTML('beforeend', `<div class='col'><label>Preço</label><input class="form-control preco" type="number" placeholder="Default input" aria-label="default input example" value='${item.PRECO.trim()}' disabled readonly></div>`);
 
-                row.insertAdjacentHTML('beforeend', `<div class='col'><label>Quantidade</label><input class="form-control quantidade" type="number" onkeyup="__updateTotalItem(this)" placeholder="Default input" aria-label="default input example" value='0.000'></div>`);
+                row.insertAdjacentHTML('beforeend', `<div class='col'><label>Quantidade</label><input class="form-control quantidade" type="number"  inputmode="decimal" onkeyup="__updateTotalItem(this)" placeholder="Default input" aria-label="default input example" value='0.000'></div>`);
 
                 row.insertAdjacentHTML('beforeend', `<div class='col'><label>Total</label><input class="form-control total" type="number" placeholder="Default input" aria-label="default input example" value='0.00' disabled readonly></div>`);
 
