@@ -242,13 +242,9 @@ skuFilter.addEventListener('keyup', () =>  __filter());
 const params = new Proxy(new URLSearchParams(window.location.search), {
     get: (searchParams, prop) => searchParams.get(prop),
 });
-console.log(params);
-if (params !== null && params.id !== undefined && params.id !== null) {
-    console.log('id', params.id);
-    __getPedido(params.id);
-} else {
-    __getFiliais();
-}
+
+
+const __main = () => __getFiliais();
 
 
 const gerarPdf = () => {
