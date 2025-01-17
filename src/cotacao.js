@@ -2,7 +2,6 @@ var identificador = null;
 var currentCompany = null;
 
 const container = document.querySelector("#grid");
-const sendButton = document.querySelector('#sendButton');
 const companySelector = document.querySelector("#filial");
 const skuFilter = document.querySelector("#sku-filter");
 const companies = [];
@@ -133,7 +132,7 @@ const __getItens = () => {
                 card.appendChild(row);
                 container.appendChild(card);
             });
-            sendButton.classList.remove('d-none');
+            
         } else {
             alert(json.message)
         }
@@ -231,11 +230,6 @@ const updateBill = () => {
     document.querySelector(".valor-total").value = totalCX.toFixed(2);
 }
 
-sendButton.addEventListener('click', () => {
-    confirmation.show('Salvar pedido?', 'Confirmação', () => {
-        __save();
-    });
-});
 companySelector.addEventListener('change', () => __getItens());
 skuFilter.addEventListener('keyup', () =>  __filter());
 
