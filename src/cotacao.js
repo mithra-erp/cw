@@ -4,6 +4,7 @@ var currentCompany = null;
 const container = document.querySelector("#grid");
 const companySelector = document.querySelector("#filial");
 const skuFilter = document.querySelector("#sku-filter");
+const checkCotados = document.querySelector("#checkbox-cotados");
 const companies = [];
 
 const __getFiliais = () => {
@@ -124,7 +125,7 @@ const __getItens = () => {
 
                 row.insertAdjacentHTML('beforeend', `<div class='col'><label>Preço</label><input class="form-control preco" type="number" placeholder="Default input" aria-label="default input example" value='${item.PRECO.trim()}' disabled readonly></div>`);
 
-                row.insertAdjacentHTML('beforeend', `<div class='col'><label>Quantidade</label><input class="form-control quantidade" type="number"  inputmode="decimal" onkeyup="__updateTotalItem(this)" placeholder="Default input" aria-label="default input example" value='0.000'></div>`);
+                row.insertAdjacentHTML('beforeend', `<div class='col'><label>Quantidade</label><input class="form-control quantidade" type="number"  onfocus="setTimeout(() => this.select(), 0)" inputmode="decimal" onkeyup="__updateTotalItem(this)" placeholder="Default input" aria-label="default input example" value='0.000'></div>`);
 
                 row.insertAdjacentHTML('beforeend', `<div class='col'><label>Total</label><input class="form-control total" type="number" placeholder="Default input" aria-label="default input example" value='0.00' disabled readonly></div>`);
 
@@ -152,7 +153,15 @@ const __updateTotalItem = (item) => {
 const __filter = () => {
     let filter = skuFilter.value.toLowerCase();
     let cards = document.querySelectorAll('.card');
+    
     cards.forEach(card => {
+        if (checkCotados.checked) {
+            let quantidade = card.querySelector('.quantidade').value;
+            if (quantidade == '' || parseFloat(quantidade) <= 0) {
+                card.style.display = 'none';
+                return;
+            }
+        }
         if (card.getAttribute('data-description').toLowerCase().indexOf(filter) > -1) {
             card.style.display = '';
         } else {
@@ -230,6 +239,7 @@ const updateBill = () => {
     document.querySelector(".valor-total").value = totalCX.toFixed(2);
 }
 
+checkCotados.addEventListener('change', () => __filter());
 companySelector.addEventListener('change', () => __getItens());
 skuFilter.addEventListener('keyup', () =>  __filter());
 
