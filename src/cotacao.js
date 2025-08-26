@@ -393,7 +393,7 @@ async function onPickAndShare(e) {
 }
 
 
-function __registerFile(file) {
+function __registerFileB64(file) {
     const id = (crypto?.randomUUID?.() || (Date.now() + Math.random().toString(16).slice(2)));
     const r = new FileReader();
     r.onload = () => {
@@ -406,4 +406,44 @@ function __registerFile(file) {
 // pegar depois (sincrônico)
 function app_getFileBase64(id) {
     return (window.__b64Cache && window.__b64Cache[id]) || null;
+}
+
+
+function __registerFile(file) {
+    const id = (crypto?.randomUUID?.() ?? (Date.now() + Math.random().toString(16).slice(2)));
+    __files.set(id, file);
+    return id;
+}
+
+// prepara metadados p/ chunking
+async function app_prepareFileChunks(id, chunkSize = 262144) { // 256 KB
+    const file = __files.get(id);
+    if (!file) return null;
+    return {
+        total: Math.ceil(file.size / chunkSize),
+        size: file.size,
+        name: file.name || "arquivo.bin",
+        mime: file.type || "application/octet-stream",
+        chunkSize
+    };
+}
+
+// retorna 1 chunk em base64 (SEM prefixo data:)
+async function app_getFileChunk(id, index, chunkSize) {
+    const file = __files.get(id);
+    if (!file) return null;
+    const start = index * chunkSize;
+    const end = Math.min(start + chunkSize, file.size);
+    const blob = file.slice(start, end);
+    const buf = await blob.arrayBuffer();
+
+    // Uint8Array -> base64
+    let binary = "";
+    const bytes = new Uint8Array(buf);
+    const len = bytes.length;
+    const block = 0x8000; // evitar call stack gigante
+    for (let i = 0; i < len; i += block) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + block, len)));
+    }
+    return btoa(binary);
 }
