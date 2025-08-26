@@ -344,8 +344,8 @@ const gerarPdf = () => {
     doc.text("PROPOSTA VALIDA PARA A DATA DA COTAÇÃO", 10, linha);
 
     const fileHandle = new File([doc.output('blob')], "cotacao.pdf", { type: "application/pdf" });
-    // share(fileHandle)
-    share({ title: 'Cotação de Preços', text: 'Segue cotação.', file: fileHandle });
+    share(fileHandle)
+    // share({ title: 'Cotação de Preços', text: 'Segue cotação.', file: fileHandle });
 }
 async function share(file) {
     // Usando o navigator.share() para compartilhar o arquivo
