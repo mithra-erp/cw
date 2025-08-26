@@ -416,16 +416,16 @@ function __registerFile(file) {
 }
 
 // prepara metadados p/ chunking
-async function app_prepareFileChunks(id, chunkSize = 262144) { // 256 KB
+function app_prepareFileChunks(id, chunkSize = 262144) { // 256 KB
     const file = __files.get(id);
     if (!file) return null;
-    return {
+    return JSON.stringify({
         total: Math.ceil(file.size / chunkSize),
         size: file.size,
         name: file.name || "arquivo.bin",
         mime: file.type || "application/octet-stream",
         chunkSize
-    };
+    });
 }
 
 // retorna 1 chunk em base64 (SEM prefixo data:)
