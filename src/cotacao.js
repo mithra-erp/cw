@@ -1,4 +1,4 @@
-
+window.__b64Cache = window.__b64Cache || {};
 // Armazena arquivos na memória (id -> File)
 const __files = new Map();
 
@@ -392,23 +392,18 @@ async function onPickAndShare(e) {
     await shareViaApp({ title: 'Compartilhar arquivo', file });
 }
 
+
 function __registerFile(file) {
-    const id = (crypto && crypto.randomUUID) ? crypto.randomUUID()
-        : String(Date.now()) + Math.random().toString(16).slice(2);
-    __files.set(id, file);
+    const id = (crypto?.randomUUID?.() || (Date.now() + Math.random().toString(16).slice(2)));
+    const r = new FileReader();
+    r.onload = () => {
+        const dataUrl = String(r.result || "");
+        window.__b64Cache[id] = dataUrl.split(",")[1] || "";
+    };
+    r.readAsDataURL(file); // async, mas preenche o cache sozinho
     return id;
 }
-// Chamado pelo C#: retorna APENAS o base64 (sem o prefixo data:)
-async function app_getFileBase64(id) {
-    const f = __files.get(id);
-    if (!f) return null;
-
-    // Opção A (rápida): ler como DataURL e tirar o prefixo
-    const dataUrl = await new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onerror = reject;
-        r.onload = () => resolve(r.result);
-        r.readAsDataURL(f);
-    });
-    return String(dataUrl).split(',')[1]; // só base64
+// pegar depois (sincrônico)
+function app_getFileBase64(id) {
+    return (window.__b64Cache && window.__b64Cache[id]) || null;
 }
