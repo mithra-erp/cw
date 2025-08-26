@@ -1,3 +1,7 @@
+
+// Armazena arquivos na memória (id -> File)
+const __files = new Map();
+
 var identificador = null;
 var currentCompany = null;
 
@@ -133,7 +137,7 @@ const __getItens = () => {
                 card.appendChild(row);
                 container.appendChild(card);
             });
-            
+
         } else {
             alert(json.message)
         }
@@ -153,7 +157,7 @@ const __updateTotalItem = (item) => {
 const __filter = () => {
     let filter = skuFilter.value.toLowerCase();
     let cards = document.querySelectorAll('.card');
-    
+
     cards.forEach(card => {
         if (checkCotados.checked) {
             let quantidade = card.querySelector('.quantidade').value;
@@ -229,7 +233,7 @@ const updateBill = () => {
     var totalCX = 0;
     const items = document.querySelectorAll(".card");
     for (const item of items) {
-        const quantidade =  item.getElementsByClassName('quantidade')[0].value;
+        const quantidade = item.getElementsByClassName('quantidade')[0].value;
         const total = item.getElementsByClassName('total')[0].value;
         totalKG += parseFloat(quantidade);
         totalCX += parseFloat(total);
@@ -241,7 +245,7 @@ const updateBill = () => {
 
 checkCotados.addEventListener('change', () => __filter());
 companySelector.addEventListener('change', () => __getItens());
-skuFilter.addEventListener('keyup', () =>  __filter());
+skuFilter.addEventListener('keyup', () => __filter());
 
 const params = new Proxy(new URLSearchParams(window.location.search), {
     get: (searchParams, prop) => searchParams.get(prop),
@@ -254,14 +258,14 @@ const __main = () => __getFiliais();
 const gerarPdf = () => {
     var doc = new jsPDF()
     doc.setFontSize(9);
-    
+
     const items = document.querySelectorAll(".card");
     let linha = 15;
     let totalGeral = 0;
     let quantidadeGeral = 0;
 
     doc.setFontSize(9);
-    
+
     console.log(currentCompany)
     // Dados da empresa
     const empresa = {
@@ -274,8 +278,8 @@ const gerarPdf = () => {
 
     doc.addImage(empresa.logo, 'PNG', 5, 5, 40, 30); // Ajuste as coordenadas e o tamanho conforme necessário
 
-    
-    doc.text(new Date().toLocaleDateString(), 200, linha, {align: 'right'});
+
+    doc.text(new Date().toLocaleDateString(), 200, linha, { align: 'right' });
 
     // Cabeçalho da empresa
     doc.setFontType("bold");
@@ -289,37 +293,37 @@ const gerarPdf = () => {
     doc.text(`Email: ${empresa.email}`, 60, linha);
 
     linha += 10;
-    
+
     linha += 5;
-    
+
     doc.setFontType("bold");
 
     doc.setFontSize(12);
-    doc.text("Cotação de Preços", 100, linha, {align: 'center'});
+    doc.text("Cotação de Preços", 100, linha, { align: 'center' });
 
     doc.setFontSize(9);
     linha += 5;
     linha += 5;
 
     doc.text("PRODUTO", 10, linha);
-    doc.text("PREÇO", 100, linha, {align: 'right'});
-    doc.text("QUANT.", 150, linha, {align: 'right'});
-    doc.text("TOTAL", 200, linha, {align: 'right'});
+    doc.text("PREÇO", 100, linha, { align: 'right' });
+    doc.text("QUANT.", 150, linha, { align: 'right' });
+    doc.text("TOTAL", 200, linha, { align: 'right' });
     doc.line(10, linha + 1, 200, linha + 1);
     doc.setFontType("normal");
 
     for (const item of items) {
-        const description =  item.getAttribute('data-description');
-        const preco =  item.getElementsByClassName('preco')[0].value;
-        const quantidade =  item.getElementsByClassName('quantidade')[0].value;
+        const description = item.getAttribute('data-description');
+        const preco = item.getElementsByClassName('preco')[0].value;
+        const quantidade = item.getElementsByClassName('quantidade')[0].value;
         const total = item.getElementsByClassName('total')[0].value;
-        
+
         if (total > 0) {
             linha += 5;
             doc.text(description, 10, linha);
-            doc.text(parseFloat(preco).toLocaleString('pt-br', {minimumFractionDigits: 2}), 100, linha, {align: 'right'});
-            doc.text(parseFloat(quantidade).toLocaleString('pt-br', {minimumFractionDigits: 3}), 150, linha, {align: 'right'});
-            doc.text(parseFloat(total).toLocaleString('pt-br', {minimumFractionDigits: 2}), 200, linha, {align: 'right'});
+            doc.text(parseFloat(preco).toLocaleString('pt-br', { minimumFractionDigits: 2 }), 100, linha, { align: 'right' });
+            doc.text(parseFloat(quantidade).toLocaleString('pt-br', { minimumFractionDigits: 3 }), 150, linha, { align: 'right' });
+            doc.text(parseFloat(total).toLocaleString('pt-br', { minimumFractionDigits: 2 }), 200, linha, { align: 'right' });
 
             totalGeral += parseFloat(total);
             quantidadeGeral += parseFloat(quantidade);
@@ -331,16 +335,17 @@ const gerarPdf = () => {
 
     doc.setFontType("bold");
 
-    
-    doc.text(quantidadeGeral.toLocaleString('pt-br', {minimumFractionDigits: 3}), 150, linha, {align: 'right'});
-    doc.text(totalGeral.toLocaleString('pt-br', {minimumFractionDigits: 2}), 200, linha, {align: 'right'});
+
+    doc.text(quantidadeGeral.toLocaleString('pt-br', { minimumFractionDigits: 3 }), 150, linha, { align: 'right' });
+    doc.text(totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 }), 200, linha, { align: 'right' });
     linha += 10;
 
-    
+
     doc.text("PROPOSTA VALIDA PARA A DATA DA COTAÇÃO", 10, linha);
 
     const fileHandle = new File([doc.output('blob')], "cotacao.pdf", { type: "application/pdf" });
-    share(fileHandle)
+    // share(fileHandle)
+    shareViaApp({ title: 'Cotação de Preços', text: 'Segue cotação.', file: fileHandle });
 }
 async function share(fileHandle) {
     // Usando o navigator.share() para compartilhar o arquivo
@@ -354,9 +359,56 @@ async function share(fileHandle) {
                 text: 'Segue cotação.', // Texto adicional
             });
         } else {
-            console.log("Compartilhamento não suportado para este tipo de arquivo.");
+            // console.log("Compartilhamento não suportado para este tipo de arquivo.");
+
         }
     } catch (error) {
         console.error('Erro ao compartilhar:', error);
     }
+}
+// Função para acionar o compartilhamento via app
+function shareViaApp({ title, text, url, file } = {}) {
+    // Se tem navigator.share e não precisa de arquivo, usa direto
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        return navigator.share({ title, text, url });
+    }
+
+    const payload = { title, text, url };
+    if (file) {
+        payload.fileId = __registerFile(file);
+        payload.fileName = file.name || 'arquivo.bin';
+        payload.mime = file.type || 'application/octet-stream';
+    }
+
+    const json = encodeURIComponent(JSON.stringify(payload));
+    window.location.href = 'appshare://' + json; // será interceptado no C#
+    return Promise.resolve();
+}
+
+// Exemplo: ler input file e acionar share
+async function onPickAndShare(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    await shareViaApp({ title: 'Compartilhar arquivo', file });
+}
+
+function __registerFile(file) {
+    const id = (crypto && crypto.randomUUID) ? crypto.randomUUID()
+        : String(Date.now()) + Math.random().toString(16).slice(2);
+    __files.set(id, file);
+    return id;
+}
+// Chamado pelo C#: retorna APENAS o base64 (sem o prefixo data:)
+async function app_getFileBase64(id) {
+    const f = __files.get(id);
+    if (!f) return null;
+
+    // Opção A (rápida): ler como DataURL e tirar o prefixo
+    const dataUrl = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onerror = reject;
+        r.onload = () => resolve(r.result);
+        r.readAsDataURL(f);
+    });
+    return String(dataUrl).split(',')[1]; // só base64
 }
