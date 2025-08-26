@@ -345,20 +345,21 @@ const gerarPdf = () => {
 
     const fileHandle = new File([doc.output('blob')], "cotacao.pdf", { type: "application/pdf" });
     // share(fileHandle)
-    shareViaApp({ title: 'Cotação de Preços', text: 'Segue cotação.', file: fileHandle });
+    share({ title: 'Cotação de Preços', text: 'Segue cotação.', file: fileHandle });
 }
-async function share(fileHandle) {
+async function share(file) {
     // Usando o navigator.share() para compartilhar o arquivo
     try {
         // Verificando se o navegador suporta compartilhamento de arquivos
-        if (navigator.canShare && navigator.canShare({ files: [fileHandle] })) {
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
             // Iniciando o compartilhamento
             await navigator.share({
-                files: [fileHandle], // Arquivo a ser compartilhado
+                files: [file], // Arquivo a ser compartilhado
                 title: 'Cotação de Preços', // Título do compartilhamento
                 text: 'Segue cotação.', // Texto adicional
             });
         } else {
+            await shareBlob(file, file.name, file.type)
             // console.log("Compartilhamento não suportado para este tipo de arquivo.");
 
         }
@@ -446,4 +447,41 @@ async function app_getFileChunk(id, index, chunkSize) {
         binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + block, len)));
     }
     return btoa(binary);
+}
+
+// Converte Blob em chunks base64 e envia via AndroidShare
+async function shareBlob(blob, fileName, mime, title = 'Compartilhar') {
+    if (!blob) { alert('Blob vazio'); return; }
+
+    // iOS/mac (fora do escopo aqui): se quiser, teste navigator.share e use lá.
+
+    if (!window.AndroidShare || !AndroidShare.begin) {
+        alert('AndroidShare indisponível no WebView.');
+        return;
+    }
+
+    const id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
+    fileName = fileName || 'arquivo.bin';
+    mime = mime || blob.type || 'application/octet-stream';
+
+    AndroidShare.begin(id, fileName, mime);
+
+    const chunkSize = 262144; // 256 KB
+    for (let off = 0; off < blob.size; off += chunkSize) {
+        const piece = blob.slice(off, off + chunkSize);
+        const buf = await piece.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+
+        // Uint8 -> base64 sem estourar call stack
+        let binary = '';
+        const block = 0x8000;
+        for (let i = 0; i < bytes.length; i += block) {
+            binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + block, bytes.length)));
+        }
+        const b64 = btoa(binary);
+
+        AndroidShare.append(id, b64);
+    }
+
+    AndroidShare.end(id, title);
 }
