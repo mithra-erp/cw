@@ -375,7 +375,7 @@ function shareViaApp({ title, text, url, file } = {}) {
 
     const payload = { title, text, url };
     if (file) {
-        payload.fileId = __registerFile(file);
+        payload.fileId = __registerFileB64(file);
         payload.fileName = file.name || 'arquivo.bin';
         payload.mime = file.type || 'application/octet-stream';
     }
